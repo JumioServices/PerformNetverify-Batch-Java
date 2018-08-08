@@ -12,7 +12,7 @@ Java JDK is needed to compile the program. Please download [here](http://www.ora
 
 Maven can be downloaded and installed directly [here](http://maven.apache.org/download.html).
 
-On Mac, Maven can also be installed through Homebrew.
+On Mac, Maven can also be installed through Homebrew. Please check [here](https://brew.sh/) for Homebrew installation.
 
 ```
 $ brew install maven
