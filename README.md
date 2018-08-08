@@ -34,21 +34,21 @@ After the compilation, 'PerformNetverify-1.0-SNAPSHOT-jar-with-dependencies.jar'
 
 Below are the parameters that can be customized. When parameter value is specified both in config file and the command line, the command line value takes precedence.
 
-Name|config.properties|command-line arg|default
+Name|command-line arg|default
 ---|---|---|---
-pathToImageFolder |yes	|yes	|nil
-serverUrl	|yes	|yes	|https://netverify.com/api/netverify/v2
-enabledFields	|yes	|no	|“idNumber,idFirstName,idLastName,idDob,idExpiry,idUsState,idPersonalNumber,idAddress,idFaceMatch"
-merchantReportingCriteria	|yes	|no	|“Jumio NV Test Tool”
-faceImageRequired |yes |no  |true
-backImageRequired |yes |no  |true
-frontSuffix |yes |no |front
-backSuffix |yes |no  |back
-faceSuffix |yes |no  |face
+pathToImageFolder |yes	|nil
+serverUrl	|yes	|https://netverify.com/api/netverify/v2
+enabledFields	|no	|“idNumber,idFirstName,idLastName,idDob,idExpiry,idUsState,idPersonalNumber,idAddress,idFaceMatch"
+merchantReportingCriteria	|no	|“Jumio NV Test Tool”
+faceImageRequired |no  |true
+backImageRequired |no  |true
+frontSuffix |no |front
+backSuffix |no  |back
+faceSuffix |no  |face
 
 ### Set API token/secret in environment variables (optional)
 
-The API token and secret can be stored in environment variables for easy access.
+Netverify requires authentication through API token and secret. They can be stored in environment variables for easy access.
 
 ```
 $ export API_TOKEN=********
