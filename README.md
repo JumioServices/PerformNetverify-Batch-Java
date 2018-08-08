@@ -68,7 +68,7 @@ $ export API_SECRET=********
 5. Use below command to run the program.
 
 ```
-$ java -jar PerformNetverify-1.0-SNAPSHOT-jar-with-dependencies.jar token=$$API_TOKEN secret=$$API_SECRET 
+$ java -jar PerformNetverify-1.0-SNAPSHOT-jar-with-dependencies.jar token=$API_TOKEN secret=$API_SECRET 
 ```
 
 ## Built With
