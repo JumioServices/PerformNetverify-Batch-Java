@@ -1,6 +1,6 @@
 # PerformNetverifyBatch
 
-Command-line client that can be used by prospect merchants to test NetVerify services. The tool eliminates the need for the merchant to integrate with us before they can test.
+Command-line client that can be used by prospect merchants to test Netverify services.
 
 ## Getting Started
 
@@ -18,6 +18,14 @@ On Mac, Maven can also be installed through Homebrew.
 $ brew install maven
 ```
 
+### Clean the project directory
+
+Use below command to make sure the environment is clean.
+
+```
+$ mvn clean
+```
+
 ### Build the program
 
 At the project's root directory, use Maven to compile the program.
@@ -26,7 +34,7 @@ At the project's root directory, use Maven to compile the program.
 $ mvn compile assembly:single
 ```
 
-After the compilation, 'PerformNetverify-1.0-SNAPSHOT-jar-with-dependencies.jar' should appear in the 'target' directory. This file is the compiled Java program.
+After compilation, 'PerformNetverify-1.0-SNAPSHOT-jar-with-dependencies.jar' should appear in the 'target' directory. This file is the compiled Java program.
 
 ## Running the program
 
