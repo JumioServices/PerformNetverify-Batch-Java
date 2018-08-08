@@ -34,12 +34,12 @@ After the compilation, 'PerformNetverify-1.0-SNAPSHOT-jar-with-dependencies.jar'
 
 Below are the parameters that can be customized. When parameter value is specified both in config file and the command line, the command line value takes precedence.
 
-Name|command-line arg|default
+Name|Command Line Arg|Default
 ---|---|---
 pathToImageFolder |yes	|nil
 serverUrl	|yes	|https://netverify.com/api/netverify/v2
-enabledFields	|no	|“idNumber,idFirstName,idLastName,idDob,idExpiry,idUsState,idPersonalNumber,idAddress,idFaceMatch"
-merchantReportingCriteria	|no	|“Jumio NV Test Tool”
+enabledFields	|no	|idNumber,idFirstName,idLastName,idDob,idExpiry,idUsState,idPersonalNumber,idAddress,idFaceMatch
+merchantReportingCriteria	|no	|Jumio NV Test Tool
 faceImageRequired |no  |true
 backImageRequired |no  |true
 frontSuffix |no |front
