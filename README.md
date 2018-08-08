@@ -20,16 +20,23 @@ When parameter value is specified both in config file and the command line, the 
 Name|config.properties|command-line arg|default
 ---|---|---|---
 pathToImageFolder |yes	|yes	|nil
-enabledFields	|yes	|no	|“idNumber,idFirstName,idLastName,idDob,idExpiry,idUsState,idPersonalNumber,idAddress"
 serverUrl	|yes	|yes	|https://netverify.com/api/netverify/v2
+token |no |yes  |null
+secret  |no |yes  |null
+enabledFields	|yes	|no	|“idNumber,idFirstName,idLastName,idDob,idExpiry,idUsState,idPersonalNumber,idAddress,idFaceMatch"
 merchantReportingCriteria	|yes	|no	|“Jumio NV Test Tool”
 faceImageRequired |yes |no  |true
-backImageRequired |yes |no  |false
+backImageRequired |yes |no  |true
 frontSuffix |yes |no |front
 backSuffix |yes |no  |back
 faceSuffix |yes |no  |face
-token |no |yes  |null
-secret  |no |yes  |null
+
+# Installation
+
+1. Install Maven on Mac
+```
+brew install maven
+```
 
 # Running the tool for the batches
 
