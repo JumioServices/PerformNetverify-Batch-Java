@@ -42,9 +42,9 @@ After compilation, 'PerformNetverify-1.0-SNAPSHOT-jar-with-dependencies.jar' sho
 
 Below are the parameters that can be customized. When parameter value is specified both in config file and the command line, the command line value takes precedence.
 
-Name|Command Line Arg|Default
+Name|Command Line Arg|Example
 ---|---|---
-pathToImageFolder |yes	|nil
+pathToImageFolder |yes	|images
 serverUrl	|yes	|https://netverify.com/api/netverify/v2
 enabledFields	|no	|idNumber,idFirstName,idLastName,idDob,idExpiry,idUsState,idPersonalNumber,idAddress,idFaceMatch
 merchantReportingCriteria	|no	|Jumio NV Test Tool
