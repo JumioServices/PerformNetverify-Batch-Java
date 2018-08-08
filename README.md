@@ -10,7 +10,9 @@ Java JDK is needed to compile the program. Please download [here](http://www.ora
 
 ### Install Maven
 
-* Homebrew
+Maven can be downloaded and installed directly [here](http://maven.apache.org/download.html).
+
+On Mac, Maven can also be installed through Homebrew.
 
 ```
 $ brew install maven
@@ -63,10 +65,10 @@ $ export API_SECRET=********
 
 4. Take 'PerformNetverify-1.0-SNAPSHOT-jar-with-dependencies.jar' and move to image folder.
 
-5. Use below command line to run the program.
+5. Use below command to run the program.
 
 ```
-java -jar PerformNetverify-1.0-SNAPSHOT-jar-with-dependencies.jar token=$$API_TOKEN secret=$$API_SECRET 
+$ java -jar PerformNetverify-1.0-SNAPSHOT-jar-with-dependencies.jar token=$$API_TOKEN secret=$$API_SECRET 
 ```
 
 ## Built With
