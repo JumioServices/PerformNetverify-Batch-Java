@@ -7,6 +7,10 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+<<<<<<< HEAD
     <orderEntry type="library" name="PerformNetverify-1.0-SNAPSHOT-jar-with-dependencies" level="project" />
+=======
+    <orderEntry type="library" name="com.google.code.gson:gson:2.8.5" level="project" />
+>>>>>>> ed2284e1af5f40454dffc95e381a024cf30bbb2b
   </component>
 </module>
