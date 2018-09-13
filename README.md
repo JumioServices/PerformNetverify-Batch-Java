@@ -8,6 +8,8 @@ Command-line client that can be used by prospect merchants to test Netverify ser
 
 Java JDK is needed to compile the program. Please download [here](http://www.oracle.com/technetwork/java/javase/downloads/index.html).
 
+Please make sure the JAVA_HOME environment variable is set to JDK.
+
 ### Install Maven
 
 Maven can be downloaded and installed directly [here](http://maven.apache.org/download.html).
