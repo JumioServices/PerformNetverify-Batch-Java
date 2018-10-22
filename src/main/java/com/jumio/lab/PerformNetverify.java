@@ -135,7 +135,7 @@ public class PerformNetverify {
 								try {
 						            JsonObject jsonObject = new JsonObject();
 						            
-						            //jsonObject.addProperty(ENABLED_FIELDS, enabledFields);
+						            jsonObject.addProperty(ENABLED_FIELDS, enabledFields);
 						            jsonObject.addProperty(MERCHANT_REPORTING_CRITERIA, merchantReportingCriteria);
 						            jsonObject.addProperty(MERCHANT_ID_SCAN_REFERENCE, idPath.getFileName().toString());
 						            
