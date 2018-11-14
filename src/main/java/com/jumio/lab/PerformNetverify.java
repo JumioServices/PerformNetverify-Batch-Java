@@ -17,6 +17,7 @@ import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import static java.nio.file.StandardCopyOption.*;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Properties;
@@ -36,7 +37,6 @@ public class PerformNetverify {
 	private static final String USER_AGENT_TXT = "Jumio NV Test Tool/v1.0";
 	private static final String PATH_TO_IMAGE_FOLDER = "pathToImageFolder";
 	private static final String SERVER_URL = "serverUrl";
-	private static final String TOKEN = "token";
 	private static final String ENABLED_FIELDS = "enabledFields";
 	private static final String MERCHANT_REPORTING_CRITERIA = "merchantReportingCriteria";
 	private static final String FRONT_SUFFIX = "frontSuffix";
@@ -49,6 +49,7 @@ public class PerformNetverify {
 	private static final String BACK_IMAGE_REQUIRED = "backImageRequired";
 	private static final String FACE_IMAGE_REQUIRED = "faceImageRequired";
 	private static final String JUMIO_ID_SCAN_REFERENCE = "jumioIdScanReference";
+	private static final String NUMBER_TO_SUBMIT = "numberToSubmit";
 	
 	private static final String SUCCESSFULLY = "successfully";
 	private static final String MSG_LIMIT = "WARN: There are more than 100 images in the folder. Only the first 100 will be processed.";
@@ -60,6 +61,7 @@ public class PerformNetverify {
 	private static final String IS_EMPTY = " is empty.";
 	private static final String NOT_EXISTING = "not existing.";
 	private static final String PERFORM_NETVERIFY_TXT = "/performNetverify";
+	private static final String COMPLETED_FOLDER = "completed";
 	private static String frontSuffix;
 	private static String faceSuffix;
 	private static String backSuffix;
@@ -77,16 +79,17 @@ public class PerformNetverify {
 			boolean requiresBack = Boolean.parseBoolean(prop.getProperty(BACK_IMAGE_REQUIRED));
 			String pathToImageFolder = prop.getProperty(PATH_TO_IMAGE_FOLDER);
 			String serverUrl = prop.getProperty(SERVER_URL);
-			String token = prop.getProperty(TOKEN);
+			String token = prop.getProperty(API_TOKEN_);
+			String secret = prop.getProperty(API_SECRET_);
 			String enabledFields = prop.getProperty(ENABLED_FIELDS);
 			String merchantReportingCriteria = prop.getProperty(MERCHANT_REPORTING_CRITERIA);
 			frontSuffix = prop.getProperty(FRONT_SUFFIX);
 			faceSuffix = prop.getProperty(FACE_SUFFIX);
 			backSuffix = prop.getProperty(BACK_SUFFIX);
-			requiresFace = Boolean.parseBoolean(prop.getProperty(FACE_IMAGE_REQUIRED));
-			
-			String secret = "";
-			
+			int numberToSubmit = Integer.parseInt(prop.getProperty(NUMBER_TO_SUBMIT));
+			int counter = 0;
+
+
 			//arguments from command line
 			for(int i = 0; i < args.length; i++) {
 				if(args[i].contains(PATH_TO_IMAGE_FOLDER_)) {
@@ -103,132 +106,154 @@ public class PerformNetverify {
 				}
 			}
 			File imageFolder = new File(pathToImageFolder);
-			
 
-			if(secret != null && !secret.equals("")) {
-				ArrayList<String> imagesArray = getAllIdImagesFromDirectory(imageFolder);
-				if(imagesArray != null && imagesArray.size() > 0) {
+			// Create the completed folder if missing so we can move submitted files
+			StringBuffer completedPath = new StringBuffer(pathToImageFolder).append(File.separator).append(COMPLETED_FOLDER);
+			File completedFolder = new File(completedPath.toString());
+			if (!completedFolder.exists()) {
+				completedFolder.mkdir();
+			}
+
+			if(secret == null || secret.equals("")) {
+				System.out.println(MSG_API_SECRET);
+				return;
+			}
+			ArrayList<String> imagesArray = getAllIdImagesFromDirectory(imageFolder);
+			if (imagesArray == null && imagesArray.size() == 0) {
+				System.out.println("\n\nNo Images to submit");
+				return;
+			}
+			try {
+				URL url = new URL(serverUrl + PERFORM_NETVERIFY_TXT);
+				String auth = token + ":" + secret;
+				auth = Base64.getEncoder().encodeToString(auth.getBytes());
+
+				String idFilename = null, backFilename = null, imgFilename = null;
+				HttpURLConnection conn;
+				OutputStreamWriter wr = null;
+				Path idPath = null, imgPath = null, backPath = null;
+
+				for (String str : imagesArray) {
+					if (counter >= numberToSubmit) {
+						System.out.println("\n\nFinal Total Submitted: " + counter);
+						break;
+					}
+
+					idPath = Paths.get(str);
+
+					conn = (HttpURLConnection) url.openConnection();
+					conn.setDoOutput(true);
+					conn.setDoInput(true);
+					conn.setRequestMethod("POST");
+					conn.setRequestProperty("Accept", "application/json");
+					conn.setRequestProperty("Content-Type", "application/json");
+					conn.setRequestProperty("User-Agent", USER_AGENT_TXT);
+					conn.setRequestProperty("Authorization", "Basic " + auth);
+
 					try {
-						URL url = new URL(serverUrl + PERFORM_NETVERIFY_TXT);
-						String auth = token + ":" + secret;
-						auth = Base64.getEncoder().encodeToString(auth.getBytes());
-						
-						HttpURLConnection conn;
-		            	OutputStreamWriter wr = null;
-		            	Path idPath, imgPath, backPath;
-			            int counter = 0;
-			            
-			            for(String str : imagesArray) {
-			            	if(counter < 100) {
-			            		
-				            	idPath = Paths.get(str);
-				            	
-				            	conn = (HttpURLConnection) url.openConnection();
-								conn.setDoOutput(true);
-								conn.setDoInput(true);
-								conn.setRequestMethod("POST");
-					            conn.setRequestProperty("Accept", "application/json");
-					            conn.setRequestProperty("Content-Type", "application/json");
-					            conn.setRequestProperty("User-Agent", USER_AGENT_TXT);
-					            conn.setRequestProperty("Authorization", "Basic " + auth);
-				            	
-								try {
-						            JsonObject jsonObject = new JsonObject();
-						            
-						            jsonObject.addProperty(ENABLED_FIELDS, enabledFields);
-						            jsonObject.addProperty(MERCHANT_REPORTING_CRITERIA, merchantReportingCriteria);
-						            jsonObject.addProperty(MERCHANT_ID_SCAN_REFERENCE, idPath.getFileName().toString());
-						            
-						            // Add front image
-									byte[] data = Files.readAllBytes(idPath);
-									String idImg = Base64.getEncoder().encodeToString(data);
-                                    jsonObject.addProperty(FRONTSIDE_IMAGE, idImg); 
+						JsonObject jsonObject = new JsonObject();
 
-						            // Add back image
-									String idFilename = idPath.getFileName().toString();
-									if (requiresBack) {
-										String backFilename = idFilename.substring(0, idFilename.lastIndexOf(".") - frontSuffix.length()) + backSuffix + idFilename.substring(idFilename.lastIndexOf("."));
-										backPath = Paths.get(idPath.getParent().toString() + idPath.getFileSystem().getSeparator() + backFilename);
-										if (!backPath.toFile().exists() && requiresBack) {
-											System.out.println(BACK_MISSING + idPath.getFileName().toString() + FILE_NOT_PROCESSED);
-											continue;
-										}
-										String backImg = Base64.getEncoder().encodeToString(Files.readAllBytes(backPath));
-										jsonObject.addProperty(BACK_IMAGE, backImg);
-									}
+						//jsonObject.addProperty(ENABLED_FIELDS, enabledFields);
+						jsonObject.addProperty(MERCHANT_REPORTING_CRITERIA, merchantReportingCriteria);
+						jsonObject.addProperty(MERCHANT_ID_SCAN_REFERENCE, idPath.getFileName().toString());
 
-									// Add face image
-									if (requiresFace) {
-										String faceFilename = idFilename.substring(0, idFilename.lastIndexOf(".") - frontSuffix.length()) + faceSuffix + idFilename.substring(idFilename.lastIndexOf("."));
-										imgPath = Paths.get(idPath.getParent().toString() + idPath.getFileSystem().getSeparator() + faceFilename);
-										if (!imgPath.toFile().exists()) {
-											System.out.println(FACE_MISSING + idPath.getFileName().toString() + FILE_NOT_PROCESSED);
-											continue;
-										}
-										String faceImg = Base64.getEncoder().encodeToString(Files.readAllBytes(imgPath));
-										jsonObject.addProperty(FACE_IMAGE, faceImg);
-									}
+						// Add front image
+						byte[] data = Files.readAllBytes(idPath);
+						String idImg = Base64.getEncoder().encodeToString(data);
+						jsonObject.addProperty(FRONTSIDE_IMAGE, idImg);
 
-									// Finished building jsonObject; Send to server
-									wr = new OutputStreamWriter(conn.getOutputStream());
-						            wr.write(jsonObject.toString());
-						            wr.flush();
-									//System.out.println(jsonObject.toString());
-						
-									String streamToString = convertStreamToString(conn.getInputStream());
-									try {
-										JsonParser parser = new JsonParser();
-										JsonObject jsonObj = (JsonObject)parser.parse(streamToString);
-										
-										if(jsonObj.get(JUMIO_ID_SCAN_REFERENCE) != null) {
-											System.out.println(idPath.getFileName().toString() + ": " + SUCCESSFULLY);
-										}
-										else {
-											System.out.println(idPath.getFileName().toString() + ": " + jsonObj.toString());
-										}
-									}
-									catch(JsonSyntaxException jsexc) {
-										System.out.println(idPath.getFileName().toString() + ": " + streamToString);
-									}
-									
-								}
-								catch(IOException ioexc) {
-									System.out.println(idPath.getFileName().toString() + ": " + ioexc.getMessage());
-								}
-								counter++;
-								conn.disconnect();
-								System.out.println("\n\nTotal Submitted: " + counter);
+						// Add back image
+						idFilename = idPath.getFileName().toString();
+						if (requiresBack) {
+							backFilename = idFilename.substring(0, idFilename.lastIndexOf(".") - frontSuffix.length()) + backSuffix + idFilename.substring(idFilename.lastIndexOf("."));
+							backPath = Paths.get(idPath.getParent().toString() + idPath.getFileSystem().getSeparator() + backFilename);
+							if (!backPath.toFile().exists() && requiresBack) {
+								System.out.println(BACK_MISSING + idPath.getFileName().toString() + FILE_NOT_PROCESSED);
+								continue;
 							}
-			            	else {
-			            		//System.out.println(MSG_LIMIT);
-			            		break;
-			            	}
+							String backImg = Base64.getEncoder().encodeToString(Files.readAllBytes(backPath));
+							jsonObject.addProperty(BACK_IMAGE, backImg);
 						}
-			            
+
+						// Add face image
+						if (requiresFace) {
+							imgFilename = idFilename.substring(0, idFilename.lastIndexOf(".") - frontSuffix.length()) + faceSuffix + idFilename.substring(idFilename.lastIndexOf("."));
+							imgPath = Paths.get(idPath.getParent().toString() + idPath.getFileSystem().getSeparator() + imgFilename);
+							if (!imgPath.toFile().exists()) {
+								System.out.println(FACE_MISSING + idPath.getFileName().toString() + FILE_NOT_PROCESSED);
+								continue;
+							}
+							String faceImg = Base64.getEncoder().encodeToString(Files.readAllBytes(imgPath));
+							jsonObject.addProperty(FACE_IMAGE, faceImg);
+						}
+
+						// Finished building jsonObject; Send to server
+						wr = new OutputStreamWriter(conn.getOutputStream());
+						wr.write(jsonObject.toString());
+						wr.flush();
+						//System.out.println(jsonObject.toString());
+
+						String streamToString = convertStreamToString(conn.getInputStream());
+						try {
+							JsonParser parser = new JsonParser();
+							JsonObject jsonObj = (JsonObject) parser.parse(streamToString);
+
+							// if successfully submitted, move the files to completed.
+							if (jsonObj.get(JUMIO_ID_SCAN_REFERENCE) != null) {
+								System.out.println(idPath.getFileName().toString() + ": " + SUCCESSFULLY);
+								if (idPath != null)
+									idPath.toFile().renameTo(new File(completedPath + idPath.getFileSystem().getSeparator() + idFilename));
+								if (backPath != null)
+									backPath.toFile().renameTo(new File(completedPath + idPath.getFileSystem().getSeparator() + backFilename));
+								if (imgPath != null)
+									imgPath.toFile().renameTo(new File(completedPath + idPath.getFileSystem().getSeparator() + imgFilename));
+							} else {
+								System.out.println(idPath.getFileName().toString() + ": " + jsonObj.toString());
+							}
+						} catch (JsonSyntaxException jsexc) {
+							System.out.println(idPath.getFileName().toString() + ": " + streamToString);
+						}
+
+					} catch (IOException ioexc) {
+						System.out.println(idPath.getFileName().toString() + ": " + ioexc.getMessage());
 					}
-					catch(MalformedURLException muexc) {
-						System.out.println(muexc);
-					}
-					catch(ProtocolException pexc) {
-						System.out.println(pexc.getMessage());
-					}
-					catch(IOException ioexc) {
-						System.out.println(ioexc.getMessage());
-					}
+					idPath = null;
+					backPath = null;
+					imgPath = null;
+
+					counter++;
+					conn.disconnect();
+					System.out.println("\n\nTotal Submitted: " + counter);
 				}
 			}
-			else {
-				System.out.println(MSG_API_SECRET);
+			catch(MalformedURLException muexc){
+				System.out.println(muexc);
 			}
+			catch(ProtocolException pexc){
+				System.out.println(pexc.getMessage());
+			}
+			catch(IOException ioexc){
+				System.out.println(ioexc.getMessage());
+			}
+
 		}
-		catch(FileNotFoundException fnfexc) {
-			System.out.println(fnfexc.getMessage());
-		}
-		catch(IOException ioexc) {
+		catch(Exception ioexc){
 			System.out.println(ioexc.getMessage());
 		}
+
 	}
-	
+
+	/*
+}
+
+catch(FileNotFoundException fnfexc) {
+	System.out.println(fnfexc.getMessage());
+}
+catch(IOException ioexc) {
+	System.out.println(ioexc.getMessage());
+}
+	}
+	*/
 	/**
 	 * getAllIdImagesFromDirectory creates a list of frontImage id's.  
 	 *
@@ -245,7 +270,8 @@ public class PerformNetverify {
 				if (name.toLowerCase().contains(frontSuffix) && name.endsWith("pdf") == false) {
 					return true;
 				} else {
-					return false;				}
+					return false;
+				}
 			}
 		};
 		File[] f = directory.listFiles(idFilter);
