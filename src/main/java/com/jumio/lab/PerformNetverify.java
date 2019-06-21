@@ -224,7 +224,7 @@ public class PerformNetverify {
                     counter++;
                     conn.disconnect();
                     System.out.println("\n\nTotal Submitted: " + counter + " Time " + "Current time " + System.currentTimeMillis());
-                    Thread.sleep(5000);
+                    Thread.sleep(30000);
                 }
             }
             catch(MalformedURLException muexc){
