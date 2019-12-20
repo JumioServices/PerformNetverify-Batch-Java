@@ -24,6 +24,7 @@ import java.util.Properties;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
+import java.util.concurrent.TimeUnit;
 
 public class PerformNetverify {
 	
@@ -158,9 +159,9 @@ public class PerformNetverify {
 						jsonObject.addProperty(MERCHANT_ID_SCAN_REFERENCE, idPath.getFileName().toString());
 						jsonObject.addProperty(MERCHANT_REPORTING_CRITERIA, merchantReportingCriteria);
 						jsonObject.addProperty(CUSTOMER_ID, "Batch");
-	//					jsonObject.addProperty(ENABLED_FIELDS, enabledFields);
-	//					jsonObject.addProperty(COUNTRY, "GBR");
-	//					jsonObject.addProperty(IDTYPE, "DRIVING_LICENSE");
+						jsonObject.addProperty(ENABLED_FIELDS, enabledFields);
+						jsonObject.addProperty(COUNTRY, "USA");
+						jsonObject.addProperty(IDTYPE, "DRIVING_LICENSE");
 
 						// Add front image
 						byte[] data = Files.readAllBytes(idPath);
@@ -219,6 +220,8 @@ public class PerformNetverify {
 						} catch (JsonSyntaxException jsexc) {
 							System.out.println(idPath.getFileName().toString() + ": " + streamToString);
 						}
+
+                        TimeUnit.SECONDS.sleep(5);
 
 					} catch (IOException ioexc) {
 						System.out.println(idPath.getFileName().toString() + ": " + ioexc.getMessage() + " Cause: " + ioexc.getCause());
