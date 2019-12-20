@@ -221,7 +221,7 @@ public class PerformNetverify {
 							System.out.println(idPath.getFileName().toString() + ": " + streamToString);
 						}
 
-                        TimeUnit.SECONDS.sleep(5);
+                        TimeUnit.SECONDS.sleep(10);
 
 					} catch (IOException ioexc) {
 						System.out.println(idPath.getFileName().toString() + ": " + ioexc.getMessage() + " Cause: " + ioexc.getCause());
