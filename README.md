@@ -75,7 +75,7 @@ $ export API_SECRET=********
 
 3. Name the selfie with 'faceSuffix'. For example, 'User12345_face.jpg'.
 
-4. Take 'PerformNetverify-1.0-SNAPSHOT-jar-with-dependencies.jar' and copy to the image folder (optional).
+4. Create an "images" folder and copy the images to the folder.
 
 5. Use below command to run the program.
 
