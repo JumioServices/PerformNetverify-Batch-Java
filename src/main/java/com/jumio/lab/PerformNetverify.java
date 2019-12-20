@@ -160,8 +160,8 @@ public class PerformNetverify {
 						jsonObject.addProperty(MERCHANT_REPORTING_CRITERIA, merchantReportingCriteria);
 						jsonObject.addProperty(CUSTOMER_ID, "Batch");
 						jsonObject.addProperty(ENABLED_FIELDS, enabledFields);
-						jsonObject.addProperty(COUNTRY, "USA");
-						jsonObject.addProperty(IDTYPE, "DRIVING_LICENSE");
+						// jsonObject.addProperty(COUNTRY, "USA");
+						// jsonObject.addProperty(IDTYPE, "DRIVING_LICENSE");
 
 						// Add front image
 						byte[] data = Files.readAllBytes(idPath);
