@@ -14,3 +14,4 @@ out/
 !/.mvn/wrapper/maven-wrapper.jar
 
 images/
+output.csv

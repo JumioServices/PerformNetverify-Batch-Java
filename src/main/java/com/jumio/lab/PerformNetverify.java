@@ -3,6 +3,7 @@ package com.jumio.lab;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -55,8 +56,11 @@ public class PerformNetverify {
     
     private static final String CUSTOMER_ID = "customerId";
     private static final String FRONTSIDE_IMAGE = "frontsideImage";
-    private static final String BACK_IMAGE = "backsideImage";
+    private static final String FRONTSIDE_IMAGE_MIME_TYPE = "frontsideImageMimeType";
+    private static final String BACKSIDE_IMAGE = "backsideImage";
+    private static final String BACKSIDE_IMAGE_MIME_TYPE = "backsideImageMimeType";
     private static final String FACE_IMAGE = "faceImage";
+    private static final String FACE_IMAGE_MIME_TYPE = "faceImageMimeType";
     private static final String JUMIO_ID_SCAN_REFERENCE = "jumioIdScanReference";
     
     private static final String BACK_MISSING = "Back image missing for: ";
@@ -140,10 +144,12 @@ public class PerformNetverify {
                 String auth = token + ":" + secret;
                 auth = Base64.getEncoder().encodeToString(auth.getBytes());
 
-                String idFilename = null, backFilename = null, imgFilename = null;
+                String frontFilename = null, backFilename = null, imgFilename = null;
                 HttpURLConnection conn;
                 OutputStreamWriter wr = null;
                 Path idPath = null, imgPath = null, backPath = null;
+
+                FileOutputStream output = new FileOutputStream("./output.csv");
 
                 for (String str : imagesArray) {
                     if (counter >= numberToSubmit) {
@@ -164,34 +170,44 @@ public class PerformNetverify {
 
                     try {
                         JsonObject jsonObject = new JsonObject();
-                        jsonObject.addProperty(CUSTOMER_ID, idPath.getFileName().toString());
                         jsonObject.addProperty(MERCHANT_ID_SCAN_REFERENCE, merchantIdScanReference);
                         jsonObject.addProperty(MERCHANT_REPORTING_CRITERIA, merchantReportingCriteria);
                         jsonObject.addProperty(ENABLED_FIELDS, enabledFields);
                         jsonObject.addProperty(COUNTRY, country);
                         jsonObject.addProperty(IDTYPE, idType);
 
-                        // Add front image
+                        // Parse front image file name
                         byte[] data = Files.readAllBytes(idPath);
                         String idImg = Base64.getEncoder().encodeToString(data);
+                        frontFilename = idPath.getFileName().toString();
+                        String customerId = frontFilename.substring(0, frontFilename.lastIndexOf(".") - frontSuffix.length());
+                        String extension = frontFilename.substring(frontFilename.lastIndexOf(".")+1);
+
+                        // Add customer ID
+                        jsonObject.addProperty(CUSTOMER_ID, customerId);
+
+                        // Add front image
                         jsonObject.addProperty(FRONTSIDE_IMAGE, idImg);
+                        jsonObject.addProperty(FRONTSIDE_IMAGE_MIME_TYPE, "image/" + extension);
+
+                        System.out.print("Processing " + customerId + " (" + extension + ") -> "); 
 
                         // Add back image
-                        idFilename = idPath.getFileName().toString();
                         if (requiresBack) {
-                            backFilename = idFilename.substring(0, idFilename.lastIndexOf(".") - frontSuffix.length()) + backSuffix + idFilename.substring(idFilename.lastIndexOf("."));
+                            backFilename =  customerId + backSuffix + "." + extension;
                             backPath = Paths.get(idPath.getParent().toString() + idPath.getFileSystem().getSeparator() + backFilename);
                             if (!backPath.toFile().exists() && requiresBack) {
                                 System.out.println(BACK_MISSING + idPath.getFileName().toString() + FILE_NOT_PROCESSED);
                                 continue;
                             }
                             String backImg = Base64.getEncoder().encodeToString(Files.readAllBytes(backPath));
-                            jsonObject.addProperty(BACK_IMAGE, backImg);
+                            jsonObject.addProperty(BACKSIDE_IMAGE, backImg);
+                            jsonObject.addProperty(BACKSIDE_IMAGE_MIME_TYPE, "image/" + extension);
                         }
 
                         // Add face image
                         if (requiresFace) {
-                            imgFilename = idFilename.substring(0, idFilename.lastIndexOf(".") - frontSuffix.length()) + faceSuffix + idFilename.substring(idFilename.lastIndexOf("."));
+                            imgFilename = customerId + faceSuffix + "." + extension;
                             imgPath = Paths.get(idPath.getParent().toString() + idPath.getFileSystem().getSeparator() + imgFilename);
                             if (!imgPath.toFile().exists()) {
                                 System.out.println(FACE_MISSING + idPath.getFileName().toString() + FILE_NOT_PROCESSED);
@@ -199,25 +215,35 @@ public class PerformNetverify {
                             }
                             String faceImg = Base64.getEncoder().encodeToString(Files.readAllBytes(imgPath));
                             jsonObject.addProperty(FACE_IMAGE, faceImg);
+                            jsonObject.addProperty(FACE_IMAGE_MIME_TYPE, "image/" + extension);
                         }
 
+                        //System.out.println(jsonObject.toString());
+                        
                         // Finished building jsonObject; Send to server
                         wr = new OutputStreamWriter(conn.getOutputStream());
                         wr.write(jsonObject.toString());
                         wr.flush();
-
-                        //System.out.println(jsonObject.toString());
 
                         String streamToString = convertStreamToString(conn.getInputStream());
                         try {
                             JsonParser parser = new JsonParser();
                             JsonObject jsonObj = (JsonObject) parser.parse(streamToString);
 
-                            // if successfully submitted, move the files to completed.
                             if ( jsonObj.get(JUMIO_ID_SCAN_REFERENCE) != null) {
-                                System.out.println(jsonObj.get(JUMIO_ID_SCAN_REFERENCE).getAsString());
+                                // Output the scan reference into output.csv
+                                String s = jsonObj.get(JUMIO_ID_SCAN_REFERENCE).getAsString();
+                                s += "\n";
+                                System.out.print(s);
+
+                                // Output to csv
+                                byte b[] = s.getBytes(); //converting string into byte array    
+                                output.write(b);    
+                                output.flush();
+
+                                // if successfully submitted, move the files to completed.
                                 if (idPath != null)
-                                    idPath.toFile().renameTo(new File(completedPath + idPath.getFileSystem().getSeparator() + idFilename));
+                                    idPath.toFile().renameTo(new File(completedPath + idPath.getFileSystem().getSeparator() + frontFilename));
                                 if (backPath != null)
                                     backPath.toFile().renameTo(new File(completedPath + idPath.getFileSystem().getSeparator() + backFilename));
                                 if (imgPath != null)
@@ -241,6 +267,8 @@ public class PerformNetverify {
                     counter++;
                     conn.disconnect();
                 }
+
+                output.close();
             }
             catch(MalformedURLException muexc){
                 System.out.println(muexc);
