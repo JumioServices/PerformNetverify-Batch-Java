@@ -28,10 +28,16 @@ import java.util.concurrent.TimeUnit;
 
 public class PerformNetverify {
     
-    private static final String API_SECRET_ = "secret=";
     private static final String API_TOKEN_ = "token=";
+    private static final String API_SECRET_ = "secret=";
+    private static final String PATH_TO_IMAGE_FOLDER_ = "pathToImageFolder=";
+    private static final String COUNTRY_ = "country=";
+    private static final String IDTYPE_ = "idType=";
+    private static final String NUMBER_TO_SUBMIT_ = "numberToSubmit=";
 
     private static final String PROPERTIES_FILE = "config.properties";
+    private static final String API_TOKEN = "token";
+    private static final String API_SECRET = "secret";
     private static final String PATH_TO_IMAGE_FOLDER = "pathToImageFolder";
     private static final String SERVER_URL = "serverUrl";
     private static final String USER_AGENT = "userAgent";
@@ -65,23 +71,13 @@ public class PerformNetverify {
     public static void main(String[] args) {
         try {
                     
-            String token = "";
-            String secret = "";
-            //arguments from command line
-            for(int i = 0; i < args.length; i++) {
-                if(args[i].contains(API_SECRET_)) {
-                    secret = args[i].replace(API_SECRET_, "");
-                }
-                else if(args[i].contains(API_TOKEN_)) {
-                    token = args[i].replace(API_TOKEN_, "");
-                }
-            }
-
             //properties file
             FileInputStream inputStream = new FileInputStream(PROPERTIES_FILE);            
             Properties prop = new Properties();
             prop.load(inputStream);
             
+            String token = prop.getProperty(API_TOKEN);
+            String secret = prop.getProperty(API_SECRET);
             String serverUrl = prop.getProperty(SERVER_URL);
             String userAgent = prop.getProperty(USER_AGENT);
             String merchantIdScanReference = prop.getProperty(MERCHANT_ID_SCAN_REFERENCE);
@@ -96,6 +92,28 @@ public class PerformNetverify {
             String enabledFields = prop.getProperty(ENABLED_FIELDS);
             boolean requiresFace = Boolean.parseBoolean(prop.getProperty(FACE_IMAGE_REQUIRED));
             boolean requiresBack = Boolean.parseBoolean(prop.getProperty(BACK_IMAGE_REQUIRED));
+
+            //arguments from command line
+            for(int i = 0; i < args.length; i++) {
+                if(args[i].contains(PATH_TO_IMAGE_FOLDER_)) {
+                    pathToImageFolder = args[i].replace(PATH_TO_IMAGE_FOLDER_, "");
+                }
+                else if(args[i].contains(API_TOKEN_)) {
+                    token = args[i].replace(API_TOKEN_, "");
+                }
+                else if(args[i].contains(API_SECRET_)) {
+                    secret = args[i].replace(API_SECRET_, "");
+                }
+                else if(args[i].contains(COUNTRY_)) {
+                    country = args[i].replace(COUNTRY_, "");
+                }
+                else if(args[i].contains(IDTYPE_)) {
+                    idType = args[i].replace(IDTYPE_, "");
+                }
+                else if(args[i].contains(NUMBER_TO_SUBMIT_)) {
+                    numberToSubmit = Integer.parseInt(args[i].replace(NUMBER_TO_SUBMIT_, ""));
+                }
+            }
 
             int counter = 0;
 
