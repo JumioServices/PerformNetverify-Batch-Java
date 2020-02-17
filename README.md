@@ -103,6 +103,8 @@ $ export API_SECRET=********
 $ java -jar target/PerformNetverify-1.0-SNAPSHOT-jar-with-dependencies.jar token=$API_TOKEN secret=$API_SECRET 
 ```
 
+6. Exam terminal output and output.csv for the new scan ref.
+
 ## Built With
 
 * [Maven](https://maven.apache.org/) - Dependency Management
