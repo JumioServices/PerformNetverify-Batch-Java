@@ -48,15 +48,20 @@ Below are the parameters that can be customized. When parameter value is specifi
 
 Name|Command Line Arg|Example
 ---|---|---
-pathToImageFolder |yes	|images
-serverUrl	|yes	|https://netverify.com/api/netverify/v2
-enabledFields	|no	|idNumber,idFirstName,idLastName,idDob,idExpiry,idUsState,idPersonalNumber,idAddress,idFaceMatch
-merchantReportingCriteria	|no	|Jumio NV Test Tool
-faceImageRequired |no  |true
-backImageRequired |no  |true
-frontSuffix |no |front
-backSuffix |no  |back
-faceSuffix |no  |face
+serverUrl                   |yes    |https://netverify.com/api/netverify/v2/performNetverify
+userAgent                   |yes    |Jumio performNetverifyBatch/1.0
+merchantIdScanReference     |yes    |Jumio NV Test Tool
+merchantReportingCriteria   |yes    |Batch
+country                     |yes    |USA
+idType                      |yes    |DRIVING_LICENSE
+pathToImageFolder           |yes    |images
+numberToSubmit              |yes    |299
+frontSuffix                 |yes    |front
+backSuffix                  |yes    |back
+faceSuffix                  |yes    |face
+enabledFields               |yes    |idNumber,idFirstName,idLastName,idDob,idExpiry,idUsState,idPersonalNumber,idAddress,idFaceMatch
+faceImageRequired           |no     |true
+backImageRequired           |no     |true
 
 ### Set API token/secret in environment variables (optional)
 
