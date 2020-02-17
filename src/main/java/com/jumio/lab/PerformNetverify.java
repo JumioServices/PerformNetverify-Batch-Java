@@ -240,17 +240,6 @@ public class PerformNetverify {
 
 	}
 
-	/*
-}
-
-catch(FileNotFoundException fnfexc) {
-	System.out.println(fnfexc.getMessage());
-}
-catch(IOException ioexc) {
-	System.out.println(ioexc.getMessage());
-}
-	}
-	*/
 	/**
 	 * getAllIdImagesFromDirectory creates a list of frontImage id's.  
 	 *
