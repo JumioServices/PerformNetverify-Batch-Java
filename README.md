@@ -21,6 +21,19 @@ On Mac, Maven can also be installed through Homebrew. Please check [here](https:
 ```
 $ brew install maven
 ```
+### Download or clone the project directory
+
+Download the zip file below and extract the content.
+
+```
+https://github.com/JumioServices/PerformNetverifyBatch-Java/archive/master.zip
+```
+
+Or use below command to clone in terminal.
+
+```
+$ git clone https://github.com/JumioServices/PerformNetverifyBatch-Java.git
+```
 
 ### Clean the project directory
 
