@@ -43,6 +43,7 @@ public class PerformNetverify {
     private static final String SERVER_URL = "serverUrl";
     private static final String USER_AGENT = "userAgent";
     private static final String ENABLED_FIELDS = "enabledFields";
+    private static final String CUSTOMER_ID = "customerId";
     private static final String MERCHANT_REPORTING_CRITERIA = "merchantReportingCriteria";
     private static final String MERCHANT_ID_SCAN_REFERENCE= "merchantIdScanReference";
     private static final String COUNTRY = "country";
@@ -54,7 +55,6 @@ public class PerformNetverify {
     private static final String BACK_IMAGE_REQUIRED = "backImageRequired";
     private static final String NUMBER_TO_SUBMIT = "numberToSubmit";
     
-    private static final String CUSTOMER_ID = "customerId";
     private static final String FRONTSIDE_IMAGE = "frontsideImage";
     private static final String FRONTSIDE_IMAGE_MIME_TYPE = "frontsideImageMimeType";
     private static final String BACKSIDE_IMAGE = "backsideImage";
@@ -84,6 +84,7 @@ public class PerformNetverify {
             String secret = prop.getProperty(API_SECRET);
             String serverUrl = prop.getProperty(SERVER_URL);
             String userAgent = prop.getProperty(USER_AGENT);
+            String customerId = prop.getProperty(CUSTOMER_ID);
             String merchantIdScanReference = prop.getProperty(MERCHANT_ID_SCAN_REFERENCE);
             String merchantReportingCriteria = prop.getProperty(MERCHANT_REPORTING_CRITERIA);
             String country = prop.getProperty(COUNTRY);
@@ -169,32 +170,30 @@ public class PerformNetverify {
                     conn.setRequestProperty("Authorization", "Basic " + auth);
 
                     try {
+                        // Parse front image file name
+                        byte[] data = Files.readAllBytes(idPath);
+                        String idImg = Base64.getEncoder().encodeToString(data);
+                        frontFilename = idPath.getFileName().toString();
+                        String filename = frontFilename.substring(0, frontFilename.lastIndexOf(".") - frontSuffix.length());
+                        String extension = frontFilename.substring(frontFilename.lastIndexOf(".")+1);
+
                         JsonObject jsonObject = new JsonObject();
+                        jsonObject.addProperty(CUSTOMER_ID, filename);
                         jsonObject.addProperty(MERCHANT_ID_SCAN_REFERENCE, merchantIdScanReference);
                         jsonObject.addProperty(MERCHANT_REPORTING_CRITERIA, merchantReportingCriteria);
                         jsonObject.addProperty(ENABLED_FIELDS, enabledFields);
                         jsonObject.addProperty(COUNTRY, country);
                         jsonObject.addProperty(IDTYPE, idType);
 
-                        // Parse front image file name
-                        byte[] data = Files.readAllBytes(idPath);
-                        String idImg = Base64.getEncoder().encodeToString(data);
-                        frontFilename = idPath.getFileName().toString();
-                        String customerId = frontFilename.substring(0, frontFilename.lastIndexOf(".") - frontSuffix.length());
-                        String extension = frontFilename.substring(frontFilename.lastIndexOf(".")+1);
-
-                        // Add customer ID
-                        jsonObject.addProperty(CUSTOMER_ID, customerId);
-
                         // Add front image
                         jsonObject.addProperty(FRONTSIDE_IMAGE, idImg);
                         jsonObject.addProperty(FRONTSIDE_IMAGE_MIME_TYPE, "image/" + extension);
 
-                        System.out.print("Processing " + customerId + " (" + extension + ") -> "); 
+                        System.out.print("Processing " + filename + " (" + extension + ") -> "); 
 
                         // Add back image
                         if (requiresBack) {
-                            backFilename =  customerId + backSuffix + "." + extension;
+                            backFilename =  filename + backSuffix + "." + extension;
                             backPath = Paths.get(idPath.getParent().toString() + idPath.getFileSystem().getSeparator() + backFilename);
                             if (!backPath.toFile().exists() && requiresBack) {
                                 System.out.println(BACK_MISSING + idPath.getFileName().toString() + FILE_NOT_PROCESSED);
@@ -207,7 +206,7 @@ public class PerformNetverify {
 
                         // Add face image
                         if (requiresFace) {
-                            imgFilename = customerId + faceSuffix + "." + extension;
+                            imgFilename = filename + faceSuffix + "." + extension;
                             imgPath = Paths.get(idPath.getParent().toString() + idPath.getFileSystem().getSeparator() + imgFilename);
                             if (!imgPath.toFile().exists()) {
                                 System.out.println(FACE_MISSING + idPath.getFileName().toString() + FILE_NOT_PROCESSED);
