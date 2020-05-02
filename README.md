@@ -43,17 +43,6 @@ Use below command to make sure the environment is clean. Open the command prompt
 $ mvn clean
 ```
 
-### Configure the program
-
-The program defaults to US datacenter. Please change the URL to point to the designated datacenter.
-
-```
-HTTP Request Method: POST
-REST URL (US): https://netverify.com/api/v4/initiate
-REST URL (EU): https://lon.netverify.com/api/v4/initiate
-REST URL (SGP): https://core-sgp.jumio.com/api/v4/initiate
-```
-
 ### Build the program
 
 At the project's root directory, use Maven to compile the program.
@@ -88,6 +77,17 @@ faceSuffix                  |no     |face
 enabledFields               |no     |idNumber,idFirstName,idLastName,idDob,idExpiry,idUsState,idPersonalNumber,idAddress,idFaceMatch
 faceImageRequired           |no     |true
 backImageRequired           |no     |true
+
+#### Configure the datacenter
+
+The program defaults to US datacenter. Please change the URL to point to the designated datacenter.
+
+```
+HTTP Request Method: POST
+REST URL (US): https://netverify.com/api/netverify/v2/performNetverify 
+REST URL (EU): https://lon.netverify.com/api/netverify/v2/performNetverify 
+REST URL (SGP): https://core-sgp.jumio.com/api/netverify/v2/performNetverify 
+```
 
 ### Set API token/secret in environment variables (optional)
 
